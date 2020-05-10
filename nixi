@@ -1,5 +1,5 @@
 #!/bin/sh
-set -e
+set -eu
 
 if [ $# = 0 ]; then
     echo "Usage: nixi ENVIRONMENT-NAME"
@@ -27,6 +27,13 @@ if [ ! -e "$env" ]; then
 fi
 
 pkgs=$(cat $env)
-cmd="nix-shell --pure -p $pkgs"
-echo $cmd
-exec $cmd
+
+# we use a nix-expression rather than -p packages... so we can remove standard packages for
+# a more pure environment
+mkshell='with import <nixpkgs> { };'\
+'runCommandNoCC "name" {'\
+'  buildInputs = [ '$pkgs' ];'\
+'} ""'
+
+echo nix-shell --pure --expr "'$mkshell'"
+exec nix-shell --pure --expr "$mkshell"

@@ -1,1 +1,1 @@
-cmake python perl zlib
+cmake python perl zlib gcc
