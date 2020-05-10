@@ -2,7 +2,7 @@
 set -eu
 
 if [ $# = 0 ]; then
-    echo "Usage: nixi ENVIRONMENT-NAME"
+    echo "Usage: nixi ENVIRONMENT-NAME [COMMAND...]"
     echo ""
     echo "Other Commands:"
     echo "nixi -list    list all environments"
@@ -12,8 +12,9 @@ fi
 
 script_dir=$(dirname "$(readlink -f -- "$0")")
 first=$1
+shift
 
-if [ "$1" == "-list" ]; then
+if [ "$first" == "-list" ]; then
     for env in $(find $script_dir/env -maxdepth 1 -type f); do
 	echo "$(basename $env): $(cat $env)"
     done
@@ -35,5 +36,9 @@ mkshell='with import <nixpkgs> { };'\
 '  buildInputs = [ '$pkgs' ];'\
 '} ""'
 
-echo nix-shell --pure --expr "'$mkshell'"
-exec nix-shell --pure --expr "$mkshell"
+if [ $# = 0 ]; then
+    echo nix-shell --pure --expr "'$mkshell'"
+    exec nix-shell --pure --expr "$mkshell"
+fi
+
+exec nix-shell --pure --expr "$mkshell" --run "$*"
