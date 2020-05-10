@@ -1,0 +1,32 @@
+#!/bin/sh
+set -e
+
+if [ $# = 0 ]; then
+    echo "Usage: nixi ENVIRONMENT-NAME"
+    echo ""
+    echo "Other Commands:"
+    echo "nixi -list    list all environments"
+    echo "nixi -add ?   should I add this?"
+    exit 1
+fi
+
+script_dir=$(dirname "$(readlink -f -- "$0")")
+first=$1
+
+if [ "$1" == "-list" ]; then
+    for env in $(find $script_dir/env -maxdepth 1 -type f); do
+	echo "$(basename $env): $(cat $env)"
+    done
+    exit 0
+fi
+
+env=$script_dir/env/$first
+if [ ! -e "$env" ]; then
+    echo "Error: nixi environment '$first' does not exist"
+    exit 1
+fi
+
+pkgs=$(cat $env)
+cmd="nix-shell --pure -p $pkgs"
+echo $cmd
+exec $cmd
