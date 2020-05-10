@@ -2,11 +2,11 @@
 set -eu
 
 if [ $# = 0 ]; then
-    echo "Usage: nixi ENVIRONMENT-NAME [COMMAND...]"
+    echo "Usage: nx ENVIRONMENT-NAME [COMMAND...]"
     echo ""
     echo "Other Commands:"
-    echo "nixi -list    list all environments"
-    echo "nixi -add ?   should I add this?"
+    echo "nx -list    list all environments"
+    echo "nx -add ?   should I add this?"
     exit 1
 fi
 
@@ -23,7 +23,7 @@ fi
 
 env=$script_dir/env/$first
 if [ ! -e "$env" ]; then
-    echo "Error: nixi environment '$first' does not exist"
+    echo "Error: nx environment '$first' does not exist"
     exit 1
 fi
 
