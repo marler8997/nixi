@@ -2,28 +2,36 @@
 set -eu
 
 if [ $# = 0 ]; then
-    echo "Usage: nx ENVIRONMENT-NAME [COMMAND...]"
+    echo "Usage: nx [-d] ENVIRONMENT-NAME [COMMAND...]"
     echo ""
+    echo "Options:"
+    echo "  -d          dirty environment (bring in the host environment)"
     echo "Other Commands:"
-    echo "nx -list    list all environments"
-    echo "nx -add ?   should I add this?"
+    echo "  nx -list    list all environments"
+    echo "  nx -add ?   should I add this?"
     exit 1
 fi
 
 script_dir=$(dirname "$(readlink -f -- "$0")")
-first=$1
-shift
 
-if [ "$first" == "-list" ]; then
+pure_arg="--pure"
+if [ "$1" = "-d" ]; then
+    pure_arg=""
+    shift
+fi
+
+if [ "$1" == "-list" ]; then
     for env in $(find $script_dir/env -maxdepth 1 -type f); do
 	echo "$(basename $env): $(cat $env)"
     done
     exit 0
 fi
 
-env=$script_dir/env/$first
+env_name=$1
+shift
+env=$script_dir/env/$env_name
 if [ ! -e "$env" ]; then
-    echo "Error: nx environment '$first' does not exist"
+    echo "Error: nx environment '$env_name' does not exist"
     exit 1
 fi
 
@@ -37,8 +45,8 @@ mkshell='with import <nixpkgs> { };'\
 '} ""'
 
 if [ $# = 0 ]; then
-    echo nix-shell --pure --expr "'$mkshell'"
-    exec nix-shell --pure --expr "$mkshell"
+    echo nix-shell $pure_arg --expr "'$mkshell'"
+    exec nix-shell $pure_arg --expr "$mkshell"
 fi
 
-exec nix-shell --pure --expr "$mkshell" --run "$*"
+exec nix-shell $pure_arg --expr "$mkshell" --run "$*"
